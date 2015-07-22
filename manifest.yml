@@ -1,0 +1,8 @@
+applications:
+- disk_quota: 1024M
+  host: javasqlihellogalaxy
+  name: Java SQLI Hello Galaxy
+  path: java_sqli_HelloGalaxy.war
+  domain: stage1.mybluemix.net
+  instances: 1
+  memory: 512M
