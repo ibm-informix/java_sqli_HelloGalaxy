@@ -34,7 +34,7 @@ CloudFoundry CLI -  Used to push the application to Bluemix.
 
  * Step 2: Download driver and place it in the WebContent/WEB-INF/lib/ directory. You may need to create a 'lib' folder.
 
-SQLI Download -> https://www-01.ibm.com/marketing/iwm/tnd/search.jsp?go=y&rs=ifxjdbc
+[Informix JDBC driver (SQLI) Download](https://www-01.ibm.com/marketing/iwm/tnd/search.jsp?go=y&rs=ifxjdbc)
 
  * Step 3: Use gradle to build a war file.
 	
@@ -56,7 +56,7 @@ Gradle -  Used to get dependencies.
  
  * Step 3: Download driver
  
-SQLI Download -> https://www-01.ibm.com/marketing/iwm/tnd/search.jsp?go=y&rs=ifxjdbc
+[Informix JDBC driver (SQLI) Download](https://www-01.ibm.com/marketing/iwm/tnd/search.jsp?go=y&rs=ifxjdbc)
 
  * Step 4: Use gradle to copy runtime dependencies
 
