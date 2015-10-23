@@ -37,9 +37,11 @@ CloudFoundry CLI -  Used to push the application to Bluemix.
 [Informix JDBC driver (SQLI) Download](https://www-01.ibm.com/marketing/iwm/tnd/search.jsp?go=y&rs=ifxjdbc)
 
  * Step 3: Use gradle to build a war file.
+ 
+ * Step 4: Update the manifest.yml to match the name, host, and domain of your Bluemix application.
 	
- * Step 4: Push application to Bluemix using CloudFoundry CLI.
-
+ * Step 5: Push application to Bluemix using CloudFoundry CLI.
+ 
 ###Option 2: Run locally
 
 ####Requirements:

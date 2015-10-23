@@ -552,6 +552,7 @@ public class java_sqli_HelloGalaxy {
 
 	public static void parseVcap() {
 
+		String serviceName = "timeseriesdatabase";
 		StringReader stringReader = new StringReader(
 				System.getenv("VCAP_SERVICES"));
 		JsonReader jsonReader = Json.createReader(stringReader);
@@ -559,11 +560,11 @@ public class java_sqli_HelloGalaxy {
 		System.out.println("vcap: " + vcap);
 		boolean ssl = false;
 		if (ssl)
-			SQLIURL = vcap.getJsonArray("altadb-dev").getJsonObject(0)
-					.getJsonObject("credentials").getString("ssl_jdbc_url");
+			SQLIURL = vcap.getJsonArray(serviceName).getJsonObject(0)
+					.getJsonObject("credentials").getString("java_jdbc_url_ssl");
 		else
-			SQLIURL = vcap.getJsonArray("altadb-dev").getJsonObject(0)
-					.getJsonObject("credentials").getString("jdbc_url");
+			SQLIURL = vcap.getJsonArray(serviceName).getJsonObject(0)
+					.getJsonObject("credentials").getString("java_jdbc_url");
 		System.out.println(SQLIURL);
 
 	}
