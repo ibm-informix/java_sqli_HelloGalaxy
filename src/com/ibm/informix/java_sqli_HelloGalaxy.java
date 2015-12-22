@@ -48,7 +48,7 @@ public class java_sqli_HelloGalaxy {
 
 	// To run locally, set the URL here
 	// For example: URL = "jdbc:informix-sqli://localhost:9088/testdb:INFORMIXSERVER=informix;USER=myuser;PASSWORD=mypassword";
-	public static String URL = "jdbc:informix-sqli://gama.lenexa.ibm.com:9200/sysmaster:INFORMIXSERVER=gama_serv1;USER=informix;PASSWORD=Ibm4ever";
+	public static String URL = "";
 		
 	// Service name for if credentials are parsed out of the Bluemix VCAP_SERVICES
 	public static String SERVICE_NAME = "timeseriesdatabase";
