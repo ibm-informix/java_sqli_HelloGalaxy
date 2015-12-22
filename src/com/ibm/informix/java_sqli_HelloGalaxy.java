@@ -1,8 +1,8 @@
-/*-
- * Java Sample Application: Connection to Informix using SQLI
- */
+/**
+ * Java Sample Application: Connect to Informix using the SQLI protocol and the Informix JDBC driver
+ **/
 
-/*-
+/**
  * Topics
  * 1 Create table 
  * 2 Inserts
@@ -24,7 +24,7 @@
  * 7.1 Count
  * 7.2 Distinct
  * 8 Drop a table
- */
+ **/
 
 package com.ibm.informix;
 import java.io.StringReader;
@@ -46,7 +46,14 @@ import com.informix.jdbc.IfxDriver;
 
 public class java_sqli_HelloGalaxy {
 
-	public static String SQLIURL;//= "jdbc:informix-sqli://yourURL:port/db:INFORMIXSERVER=server1;user=username;password=password";
+	// To run locally, set the URL here
+	// For example: URL = "jdbc:informix-sqli://localhost:9088/testdb:INFORMIXSERVER=informix;USER=myuser;PASSWORD=mypassword";
+	public static String URL = "jdbc:informix-sqli://gama.lenexa.ibm.com:9200/sysmaster:INFORMIXSERVER=gama_serv1;USER=informix;PASSWORD=Ibm4ever";
+		
+	// Service name for if credentials are parsed out of the Bluemix VCAP_SERVICES
+	public static String SERVICE_NAME = "timeseriesdatabase";
+	public static boolean USE_SSL = false;
+	
 	public static List<String> everything = new ArrayList<String>();
 	
 	public static final City kansasCity = new City("Kansas City", 467007, 39.0997, 94.5783, 1);
@@ -59,37 +66,32 @@ public class java_sqli_HelloGalaxy {
 	public static final City sydney = new City("Sydney", 4293000, -33.8651, -151.2094, 61);
 		
 	public static void main(String[] args) {
-		// connect to bluemix
-		// if (args[0] != null)
-		// SQLIURL = args[0];
-		// else
-		// parseVcap();
-
 		doEverything();
 
-		// print log
-		for (String s : everything)
+		for (String s : everything) {
 			System.out.println(s);
-
+		}
 	}
 
 	public static List<String> doEverything() {
-		parseVcap();
+		everything.clear();
+		
+		Connection connection = null;
 		try {
-
+			parseVcap();
+			
 			// initialize some variables
 			String tableName = "cities";
 			String sql = "";
 			List<String> output = new ArrayList<String>();
 			PreparedStatement statement = null;
 			Properties prop = new Properties();
-			Connection conn;
 			// <------------------------------------->
 
 			//connect to database
-            conn = new IfxDriver().connect(SQLIURL, prop);
-            if (conn != null)
-                everything.add("Connected to: " + SQLIURL);
+            connection = new IfxDriver().connect(URL, prop);
+            if (connection != null)
+            	everything.add("Connected to: " + URL);
             //<------------------------------------->
 
 			everything.add("\nTopics");
@@ -98,7 +100,7 @@ public class java_sqli_HelloGalaxy {
 			everything.add("\n1 Create table");
 			
 			sql = "create table if not exists " + tableName + " (City VARCHAR(255),Population INTEGER,Longitude DECIMAL(8,4),Latitude DECIMAL(8,4),Code INTEGER)";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 
 			everything.add("\tCreate a table named: " + tableName);
@@ -112,7 +114,7 @@ public class java_sqli_HelloGalaxy {
 			everything.add("2.1 Insert a single document into a table");
 
 			sql = "insert into " + tableName + " values (?,?,?,?,?)";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.setString(1, kansasCity.name);
 			statement.setInt(2, kansasCity.population);
 			statement.setDouble(3, kansasCity.longitude);
@@ -136,7 +138,7 @@ public class java_sqli_HelloGalaxy {
 			cities.add(madrid);
 			cities.add(melbourne);
 			sql = "insert into " + tableName + " values(?,?,?,?,?)";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			for (City city : cities) {
 				statement.setString(1, city.name);
 				statement.setInt(2, city.population);
@@ -165,7 +167,7 @@ public class java_sqli_HelloGalaxy {
 			output.clear();
 			String condition = "population > 8000000 and code = 1";
 			sql = "select * from " + tableName + " where " + condition;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			ResultSet rs = statement.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
 			StringBuilder stringBuilder = new StringBuilder();
@@ -193,7 +195,7 @@ public class java_sqli_HelloGalaxy {
 			output.clear();
 			condition = "population > 8000000 and longitude > 40.0";
 			sql = "select * from " + tableName + " where " + condition;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -219,7 +221,7 @@ public class java_sqli_HelloGalaxy {
 
 			output.clear();
 			sql = "select * from " + tableName;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -245,7 +247,7 @@ public class java_sqli_HelloGalaxy {
 			
 			condition = "longitude < 40.0";
 			sql = "select count(*) from " + tableName + " where " + condition;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			int numberInTable = 0;
 			while (rs.next())
@@ -264,7 +266,7 @@ public class java_sqli_HelloGalaxy {
 			output.clear();
 			condition = "population";
 			sql = "select * from " + tableName + " order by " + condition;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -291,33 +293,33 @@ public class java_sqli_HelloGalaxy {
 			//create another table with data
 			String tableJoin = "country";
 			sql = "create table if not exists " + tableJoin + " (countryCode INTEGER, countryName VARCHAR(255))";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			sql = "insert into " + tableJoin + " values (1,\"United States of America\")";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 			sql = "insert into " + tableJoin + " values (44,\"United Kingdom\")";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 			sql = "insert into " + tableJoin + " values (81,\"Japan\")";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 			sql = "insert into " + tableJoin + " values (34,\"Spain\")";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 			sql = "insert into " + tableJoin + " values (61,\"Australia\")";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 			
 			//join tables
 			output.clear();
 			sql = "select n.city, n.population, n.longitude, n.latitude, n.code, j.countryName from " + tableName + " n inner join " + tableJoin + " j on n.code=j.countryCode"; 
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -343,7 +345,7 @@ public class java_sqli_HelloGalaxy {
 			output.clear();
 			condition = "longitude > 40.0";
 			sql = "select distinct code from " + tableName + " where " + condition;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -370,7 +372,7 @@ public class java_sqli_HelloGalaxy {
 			condition = "population > 8000000";
 			String projection = "city, code";
 			sql = "select distinct " + projection + " from " + tableName + " where " + condition;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -397,7 +399,7 @@ public class java_sqli_HelloGalaxy {
 			int updatedValue = 999;
 			statement.close();
 			sql = "update " + tableName + " set code = " + updatedValue + " where city  = '" + nameToUpdate + "'";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 
@@ -411,7 +413,7 @@ public class java_sqli_HelloGalaxy {
 			String nameToDelete = "Tokyo";
 			sql = "delete from " + tableName + " where city like '"
 					+ nameToDelete + "'";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 
@@ -423,13 +425,13 @@ public class java_sqli_HelloGalaxy {
 			everything.add("\n6 Transactions");
 			
 			//transaction start
-			conn.setAutoCommit(false);
+			connection.setAutoCommit(false);
 			
 			everything.add("\tStart Transaction...");
 			
 			//transaction insert
 			sql = "insert into " + tableName + " values (?,?,?,?,?)";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.setString(1, sydney.name);
 			statement.setInt(2, sydney.population);
 			statement.setDouble(3, sydney.longitude);
@@ -443,14 +445,14 @@ public class java_sqli_HelloGalaxy {
 			nameToUpdate = "Seattle";
 			updatedValue = 998;
 			sql = "update " + tableName + " set code = " + updatedValue + " where city  = '" + nameToUpdate + "'";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			
 			everything.add("\tUpdate Document");
 			
 			//transaction savepoint
-			conn.commit();
-			Savepoint savepoint = conn.setSavepoint();
+			connection.commit();
+			Savepoint savepoint = connection.setSavepoint();
 			
 			everything.add("\tCreate Savepoint...");
 			
@@ -458,19 +460,19 @@ public class java_sqli_HelloGalaxy {
 			nameToDelete = "Sydney";
 			sql = "delete from " + tableName + " where city like '"
 					+ nameToDelete + "'";
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			
 			everything.add("\tDelete Document");
 			
 			//transaction rollback
-			conn.rollback(savepoint);
-			conn.commit();
+			connection.rollback(savepoint);
+			connection.commit();
 			
 			everything.add("\tRoll back to savepoint...");
 			
 			//transaction end
-			conn.setAutoCommit(true);
+			connection.setAutoCommit(true);
 			
 			everything.add("\tTransaction Complete");
 			// <------------------------------------->
@@ -482,7 +484,7 @@ public class java_sqli_HelloGalaxy {
 			everything.add("7.1 Count");
 			
 			sql = "select count(*) from " + tableName;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			numberInTable = 0;
 			while (rs.next())
@@ -500,7 +502,7 @@ public class java_sqli_HelloGalaxy {
 			
 			output.clear();
 			sql = "select distinct code from " + tableName;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			rs = statement.executeQuery();
 			rsmd = rs.getMetaData();
 			stringBuilder = new StringBuilder();
@@ -524,11 +526,11 @@ public class java_sqli_HelloGalaxy {
 			everything.add("\n7 Drop a table");
 	
 			sql = "drop table " + tableName;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 			sql = "drop table " + tableJoin;
-			statement = conn.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
 			statement.executeUpdate();
 			statement.close();
 	
@@ -541,31 +543,55 @@ public class java_sqli_HelloGalaxy {
 			everything.add("\nComplete!");
 
 		} catch (Exception e) {
-			System.err.println("[ERROR] "
-					+ (e instanceof SQLException ? " Error Code : "
-							+ ((SQLException) e).getErrorCode() : "")
-					+ " Message : " + e.getMessage());
-			e.printStackTrace();
+			String errMessage = "[ERROR] "
+                    + (e instanceof SQLException ? " Error Code : "
+                            + ((SQLException) e).getErrorCode() : "")
+                    + " Message : " + e.getMessage();
+        	everything.add(errMessage);
+            System.err.println(errMessage);
+            e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					
+				}
+			}
 		}
 		return everything;
 	}
 
-	public static void parseVcap() {
+	public static void parseVcap() throws Exception {
 
-		String serviceName = "timeseriesdatabase";
-		StringReader stringReader = new StringReader(
-				System.getenv("VCAP_SERVICES"));
+		if (URL != null && !URL.equals("")) {
+			// If URL is already set, use it as is
+			return;
+		}
+ 
+		// Otherwise parse URL and credentials from VCAP_SERVICES
+		String serviceName = System.getenv("SERVICE_NAME");
+		if(serviceName == null || serviceName.length() == 0) {
+			serviceName = SERVICE_NAME;
+		}
+		String vcapServices = System.getenv("VCAP_SERVICES");
+		if (vcapServices == null) {
+			throw new Exception("VCAP_SERVICES not found in the environment"); 
+		}
+		StringReader stringReader = new StringReader(vcapServices);
 		JsonReader jsonReader = Json.createReader(stringReader);
 		JsonObject vcap = jsonReader.readObject();
 		System.out.println("vcap: " + vcap);
-		boolean ssl = false;
-		if (ssl)
-			SQLIURL = vcap.getJsonArray(serviceName).getJsonObject(0)
+		if (vcap.getJsonArray(serviceName) == null) {
+			throw new Exception("Service " + serviceName + " not found in VCAP_SERVICES");
+		}
+		if (USE_SSL)
+			URL = vcap.getJsonArray(serviceName).getJsonObject(0)
 					.getJsonObject("credentials").getString("java_jdbc_url_ssl");
 		else
-			SQLIURL = vcap.getJsonArray(serviceName).getJsonObject(0)
+			URL = vcap.getJsonArray(serviceName).getJsonObject(0)
 					.getJsonObject("credentials").getString("java_jdbc_url");
-		System.out.println(SQLIURL);
+		System.out.println(URL);
 
 	}
 
